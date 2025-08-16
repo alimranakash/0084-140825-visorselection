@@ -2,7 +2,7 @@
 /*
 Plugin Name: Visor Selector
 Description: A WooCommerce product selector for helmets, integrated with Elementor.
-Version: 2.02
+Version: 2.03
 Author: Heated Visor Dev (Al Imran Akash)
 */
 
@@ -53,6 +53,9 @@ function hv_get_visor_products() {
 function hv_clear_visor_product_cache($post_id) {
     if (get_post_type($post_id) === 'product') {
         delete_transient('hv_visor_product_map');
+
+        // Also clear insert pricing cache
+        wp_cache_flush_group('visor_selector');
     }
 }
 
@@ -426,19 +429,95 @@ function hv_sanitize_settings($input) {
     return $sanitized;
 }
 
-// Get extras pricing dynamically
-function hv_get_extras_pricing() {
-    $settings = hv_get_settings();
+// Get insert product price by make and model
+function hv_get_insert_product_price($make, $model) {
+    // Cache key for performance
+    $cache_key = 'hv_insert_price_' . sanitize_title($make . '_' . $model);
+    $cached_price = wp_cache_get($cache_key, 'visor_selector');
 
+    if ($cached_price !== false) {
+        return floatval($cached_price);
+    }
+
+    // Query for insert product with specific attributes
+    $args = array(
+        'post_type' => 'product',
+        'post_status' => 'publish',
+        'posts_per_page' => 1,
+        'meta_query' => array(
+            'relation' => 'AND',
+            array(
+                'key' => '_stock_status',
+                'value' => 'instock',
+                'compare' => '='
+            )
+        ),
+        'tax_query' => array(
+            'relation' => 'AND',
+            array(
+                'taxonomy' => 'pa_helmet_make',
+                'field' => 'slug',
+                'terms' => sanitize_title($make),
+                'operator' => 'IN'
+            ),
+            array(
+                'taxonomy' => 'pa_helmet_model',
+                'field' => 'slug',
+                'terms' => sanitize_title($model),
+                'operator' => 'IN'
+            ),
+            array(
+                'taxonomy' => 'pa_pack_type',
+                'field' => 'slug',
+                'terms' => 'insert-only',
+                'operator' => 'IN'
+            )
+        )
+    );
+
+    $query = new WP_Query($args);
+    $price = 0;
+
+    if ($query->have_posts()) {
+        $product_id = $query->posts[0]->ID;
+        $product = wc_get_product($product_id);
+
+        if ($product) {
+            $price = floatval($product->get_regular_price());
+        }
+    }
+
+    wp_reset_postdata();
+
+    // Fallback to default if no product found
+    if ($price <= 0) {
+        $settings = hv_get_settings();
+        $price = !empty($settings['extra_insert_price']) ? floatval($settings['extra_insert_price']) : 194.99;
+    }
+
+    // Cache the result for 1 hour
+    wp_cache_set($cache_key, $price, 'visor_selector', 3600);
+
+    return $price;
+}
+
+// Get extras pricing dynamically
+function hv_get_extras_pricing($make = '', $model = '') {
+    $settings = hv_get_settings();
     $pricing = [];
 
-    // Add extra battery price (with fallback to default)
+    // Add extra battery price (fixed pricing from settings)
     $battery_price = !empty($settings['extra_battery_price']) ? $settings['extra_battery_price'] : '134.99';
     $pricing['extra-battery'] = floatval($battery_price);
 
-    // Add extra insert price (with fallback to default)
-    $insert_price = !empty($settings['extra_insert_price']) ? $settings['extra_insert_price'] : '194.99';
-    $pricing['extra-insert'] = floatval($insert_price);
+    // Add extra insert price (dynamic pricing based on product lookup)
+    if (!empty($make) && !empty($model)) {
+        $pricing['extra-insert'] = hv_get_insert_product_price($make, $model);
+    } else {
+        // Fallback to settings if make/model not provided
+        $insert_price = !empty($settings['extra_insert_price']) ? $settings['extra_insert_price'] : '194.99';
+        $pricing['extra-insert'] = floatval($insert_price);
+    }
 
     return $pricing;
 }
@@ -476,7 +555,7 @@ add_action('init', function () {
             'cart_url' => wc_get_cart_url(),
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('hv_add_to_cart'),
-            'extras_pricing' => hv_get_extras_pricing(),
+            'extras_pricing' => hv_get_extras_pricing(), // Only battery pricing, insert is dynamic
             'settings' => hv_get_settings()
         ]);
 
@@ -833,8 +912,6 @@ add_action('woocommerce_before_calculate_totals', function ($cart) {
         return;
     }
 
-    $extras_pricing = hv_get_extras_pricing();
-
     // Get cart contents
     $cart_contents = $cart->get_cart();
 
@@ -843,6 +920,17 @@ add_action('woocommerce_before_calculate_totals', function ($cart) {
         if (empty($cart_item['hv_extras']) || !is_array($cart_item['hv_extras'])) {
             continue;
         }
+
+        // Get make and model from cart item configuration for dynamic pricing
+        $make = '';
+        $model = '';
+        if (!empty($cart_item['hv_configuration'])) {
+            $make = $cart_item['hv_configuration']['make'] ?? '';
+            $model = $cart_item['hv_configuration']['model'] ?? '';
+        }
+
+        // Get extras pricing with dynamic insert pricing
+        $extras_pricing = hv_get_extras_pricing($make, $model);
 
         // Calculate total extra cost
         $extra_total = 0;
@@ -860,9 +948,6 @@ add_action('woocommerce_before_calculate_totals', function ($cart) {
 
             // Set the new price
             $product->set_price($new_price);
-
-            // Temporary debug - remove after testing
-            error_log("HV: Price updated - Original: £{$original_price}, Extra: £{$extra_total}, New: £{$new_price}");
         }
     }
 }, 20, 1);

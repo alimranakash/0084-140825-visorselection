@@ -271,8 +271,13 @@ if (modelUnknownBtn) {
                     let extraInsertPrice = 0;
 
                     if (insertExtra && insertExtra.checked) {
-                        // Use the extras pricing from settings, not the insert product price
-                        extraInsertPrice = extrasPricing["extra-insert"] || 194.99;
+                        // For insert extra, use the actual insert product price (dynamic pricing)
+                        if (insertProduct && insertProduct.price) {
+                            extraInsertPrice = parseFloat(insertProduct.price);
+                        } else {
+                            // Fallback to static pricing if insert product not found
+                            extraInsertPrice = extrasPricing["extra-insert"] || 194.99;
+                        }
                         displayPrice += extraInsertPrice;
                     }
 
