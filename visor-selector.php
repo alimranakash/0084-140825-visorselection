@@ -2,7 +2,7 @@
 /*
 Plugin Name: Visor Selector
 Description: A WooCommerce product selector for helmets, integrated with Elementor.
-Version: 2.01
+Version: 2.02
 Author: Heated Visor Dev (Al Imran Akash)
 */
 
@@ -611,7 +611,7 @@ add_action('wp_enqueue_scripts', function () {
         'visor-selector',
         plugins_url('assets/visor.js', __FILE__),
         [],
-        '1.3',
+        time(),
         true
     );
 
@@ -621,7 +621,7 @@ add_action('wp_enqueue_scripts', function () {
         'visor-selector-style',
         plugins_url('assets/style.css', __FILE__),
         [],
-        '1.0'
+        time()
     );
     wp_enqueue_style('visor-selector-style');
 
@@ -818,7 +818,7 @@ add_action('woocommerce_checkout_create_order_line_item', function($item, $cart_
 
 // Adjust price when extras are chosen
 add_action('woocommerce_before_calculate_totals', function ($cart) {
-    // Skip if in admin but not during AJAX (to allow cart updates during AJAX)
+    // Skip if in admin but not during AJAX
     if (is_admin() && !wp_doing_ajax()) {
         return;
     }
@@ -828,13 +828,23 @@ add_action('woocommerce_before_calculate_totals', function ($cart) {
         return;
     }
 
+    // Skip if cart is empty
+    if ($cart->is_empty()) {
+        return;
+    }
+
     $extras_pricing = hv_get_extras_pricing();
 
-    foreach ($cart->get_cart() as $cart_item) {
-        if (empty($cart_item['hv_extras'])) {
+    // Get cart contents
+    $cart_contents = $cart->get_cart();
+
+    foreach ($cart_contents as $cart_item_key => $cart_item) {
+        // Skip if no extras
+        if (empty($cart_item['hv_extras']) || !is_array($cart_item['hv_extras'])) {
             continue;
         }
 
+        // Calculate total extra cost
         $extra_total = 0;
         foreach ($cart_item['hv_extras'] as $extra) {
             if (isset($extras_pricing[$extra])) {
@@ -842,10 +852,17 @@ add_action('woocommerce_before_calculate_totals', function ($cart) {
             }
         }
 
+        // Apply extra cost to product price
         if ($extra_total > 0) {
-            $original_price = $cart_item['data']->get_regular_price();
+            $product = $cart_item['data'];
+            $original_price = (float) $product->get_regular_price();
             $new_price = $original_price + $extra_total;
-            $cart_item['data']->set_price($new_price);
+
+            // Set the new price
+            $product->set_price($new_price);
+
+            // Temporary debug - remove after testing
+            error_log("HV: Price updated - Original: £{$original_price}, Extra: £{$extra_total}, New: £{$new_price}");
         }
     }
-}, 10, 1);
+}, 20, 1);
