@@ -54,8 +54,16 @@ function hv_clear_visor_product_cache($post_id) {
     if (get_post_type($post_id) === 'product') {
         delete_transient('hv_visor_product_map');
 
-        // Also clear insert pricing cache
-        wp_cache_flush_group('visor_selector');
+        // Clear insert pricing cache more specifically
+        $product = wc_get_product($post_id);
+        if ($product) {
+            $make = $product->get_attribute('pa_helmet_make');
+            $model = $product->get_attribute('pa_helmet_model');
+            if ($make && $model) {
+                $cache_key = 'hv_insert_price_' . sanitize_title($make . '_' . $model);
+                wp_cache_delete($cache_key, 'visor_selector');
+            }
+        }
     }
 }
 
@@ -531,9 +539,6 @@ function hv_get_extras_pricing($make = '', $model = '') {
 
 add_action('init', function () {
     add_shortcode('visor_selector', function () {
-        // Prevent WordPress from adding automatic <br> tags
-        remove_filter('the_content', 'wpautop');
-
         ob_start();
 
         // Get products from cache
@@ -623,7 +628,8 @@ add_action('wp_ajax_nopriv_hv_add_to_cart', 'hv_handle_add_to_cart');
 function hv_handle_add_to_cart() {
     // Verify nonce
     if (!wp_verify_nonce($_POST['nonce'], 'hv_add_to_cart')) {
-        wp_die('Security check failed');
+        wp_send_json_error('Security check failed');
+        return;
     }
 
     // Get product ID
