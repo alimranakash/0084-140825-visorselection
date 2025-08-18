@@ -28,6 +28,11 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
+    // Debug: Check if elements are found
+    console.log("Price display element:", priceDisplay);
+    console.log("Products data:", products.length, "products loaded");
+    console.log("Extras pricing:", extrasPricing);
+
     const makes = [...new Set(products.map(p => p.make.toLowerCase().trim()))];
     makes.forEach(make => {
         const btn = document.createElement("button");
@@ -78,7 +83,7 @@ document.addEventListener("DOMContentLoaded", function () {
         modelSelect.disabled = false;
         selectedModel = null;
         selectedPack = null;
-        priceDisplay.innerHTML = '<strong>YOUR CART TOTAL: £XXX.XX</strong>';
+        priceDisplay.innerHTML = 'YOUR PRICE £XXX.XX';
         addToCartBtn.disabled = true;
         addToCartBtn.textContent = "SELECT OPTIONS";
         if (batteryWrap) batteryWrap.style.display = "none";
@@ -238,6 +243,8 @@ if (modelUnknownBtn) {
 
 
     function updateProductMatch() {
+        console.log("updateProductMatch called:", selectedMake, selectedModel, selectedPack);
+
         if (selectedMake && selectedModel && selectedPack) {
             const normalizedMake = selectedMake.toLowerCase().trim();
             selectedProduct = products.find(p =>
@@ -246,8 +253,11 @@ if (modelUnknownBtn) {
                 p.pack === selectedPack
             );
 
+            console.log("Selected product:", selectedProduct);
+
             if (selectedProduct) {
                 let finalPrice = parseFloat(selectedProduct.price);
+                console.log("Final price:", finalPrice);
 
                 if (selectedPack === "Full Pack") {
                     if (batteryWrap) batteryWrap.style.display = "block";
@@ -281,12 +291,9 @@ if (modelUnknownBtn) {
                         displayPrice += extraInsertPrice;
                     }
 
-                    // Update the price display to show total including insert
-                    if (insertExtra && insertExtra.checked) {
-                        priceDisplay.innerHTML = `<strong>YOUR CART TOTAL: £${displayPrice.toFixed(2)}</strong> <small style="color: #666;">(Includes main product £${finalPrice.toFixed(2)} + extra insert £${extraInsertPrice.toFixed(2)})</small>`;
-                    } else {
-                        priceDisplay.innerHTML = `<strong>YOUR CART TOTAL: £${finalPrice.toFixed(2)}</strong>`;
-                    }
+                    // Update the price display
+                    console.log("Updating price display to:", displayPrice);
+                    priceDisplay.innerHTML = `YOUR PRICE £${displayPrice.toFixed(2)}`;
 
                     addToCartBtn.disabled = false;
                     addToCartBtn.textContent = "ADD TO CART";
@@ -296,7 +303,8 @@ if (modelUnknownBtn) {
                     if (extrasWrap) extrasWrap.style.display = "none";
                 }
 
-                priceDisplay.innerHTML = `<strong>YOUR CART TOTAL: £${finalPrice.toFixed(2)}</strong>`;
+                console.log("Updating price display (no extras) to:", finalPrice);
+                priceDisplay.innerHTML = `YOUR PRICE £${finalPrice.toFixed(2)}`;
                 addToCartBtn.disabled = false;
                 addToCartBtn.textContent = "ADD TO CART";
             } else {
@@ -307,7 +315,7 @@ if (modelUnknownBtn) {
                 if (extrasWrap) extrasWrap.style.display = "none";
             }
         } else {
-            priceDisplay.innerHTML = '<strong>YOUR CART TOTAL: £XXX.XX</strong>';
+            priceDisplay.innerHTML = 'YOUR PRICE £XXX.XX';
             addToCartBtn.disabled = true;
             addToCartBtn.textContent = "SELECT OPTIONS";
         }
@@ -511,7 +519,7 @@ if (modelUnknownBtn) {
             if (extrasWrap) extrasWrap.style.display = "none";
 
             // Reset price and button
-            priceDisplay.innerHTML = '<strong>YOUR CART TOTAL: £XXX.XX</strong>';
+            priceDisplay.innerHTML = 'YOUR PRICE £XXX.XX';
             addToCartBtn.disabled = true;
             addToCartBtn.textContent = "SELECT OPTIONS";
         });
@@ -537,5 +545,6 @@ if (modelUnknownBtn) {
         });
     }
 
-
+    // Initial price update
+    updateProductMatch();
 });

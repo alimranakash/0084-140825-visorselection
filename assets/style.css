@@ -18,10 +18,10 @@
 }
 
 .make-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 20px;
-    justify-items: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    justify-content: flex-start;
     margin: 0 0 20px 0;
     padding: 0;
 }
@@ -34,32 +34,31 @@
     padding: 6px;
     border-radius: 6px;
     background-color: transparent;
-    transition: border 0.2s ease, box-shadow 0.2s ease;
+    transition: border 0.2s ease;
     cursor: pointer;
+    margin: 5px;
 }
 
 .make-button:hover {
-    border: 1px solid #0073aa;
-    box-shadow: 0 0 4px rgba(0, 115, 170, 0.2);
+    border: 1px solid #0CA5E2;
     background-color: transparent !important;
 }
 
 .make-button img {
     display: block;
-    width: 100px;
+    width: 80px;
     height: auto;
     object-fit: contain;
 }
 
-.make-button:hover,
 .make-button.active {
-    border-color: #0073aa;
-    background: #f0f8ff;
+    border: 1px solid #0CA5E2;
+    background-color: transparent;
 }
 
 .model-select-row {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     align-items: center;
     margin: 0 0 20px 0;
     padding: 0;
@@ -118,14 +117,14 @@
 #make-select {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 10px;
     justify-content: flex-start; 
     margin-bottom: 20px;
 }
 
 .pack-wrap {
     display: flex;
-    /*gap: 12px;*/
+    gap: 10px;
     flex-wrap: wrap;
     justify-content: flex-start;
     margin: 0 0 20px 0;
@@ -149,8 +148,6 @@
 	text-transform: uppercase;
 	letter-spacing: 1px;
     transition: background-color 0.2s ease, border-color 0.2s ease;
-/*    text-align: center;
-    vertical-align: middle;*/
     line-height: 1;
     white-space: nowrap;
 }
@@ -162,7 +159,6 @@
 
 /* Hover state */
 .pack-wrap label:hover {
-    background-color: #0CA5E2;
     border-color: #0CA5E2;
 }
 
@@ -182,7 +178,7 @@
 /* Battery colour buttons */
 .battery-wrap {
     display: flex;
-    /*gap: 12px;*/
+    gap: 10px;
     flex-wrap: wrap;
     justify-content: flex-start;
     margin: 0 0 20px 0;
@@ -283,7 +279,7 @@
 
 .extras-options {
     display: flex;
-    /*gap: 12px;*/
+    gap: 10px;
     flex-wrap: wrap;
     justify-content: flex-start;
     align-items: center;
@@ -332,32 +328,50 @@
 /* Action buttons styling */
 .action-buttons {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     flex-wrap: wrap;
     justify-content: flex-start;
     margin: 20px 0 0 0;
     padding: 0;
 }
 
-.reset-button,
-.clear-button {
-    background-color: #6c757d;
-    border: 1px solid #6c757d;
-    color: white;
+.reset-button {
+    background: none;
+    border: none;
+    color: #666;
     font-family: 'Montserrat', sans-serif;
-    font-weight: 500;
-    padding: 10px 16px;
+    font-weight: 400;
+    padding: 0;
     font-size: 12px;
-    border-radius: 0px;
-    letter-spacing: 1px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
-    text-transform: uppercase;
+    transition: color 0.2s ease;
+    text-transform: lowercase;
+    text-decoration: underline;
+}
+
+.clear-button {
+    background: none;
+    border: none;
+    color: #666;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400;
+    padding: 0;
+    font-size: 12px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    text-transform: lowercase;
+    text-decoration: underline;
+    margin-top: 8px;
+    display: block;
 }
 
 .reset-button:hover,
 .clear-button:hover {
-    background-color: #5a6268;
+    color: #0CA5E2;
+    background: transparent;
+}
+div#visor-selector p {
+    margin: 0;
 }
 
 .extras-controls {
@@ -368,20 +382,20 @@
 #visor-price {
     font-size: 15px;
     font-weight: 700;
-    color: #0CA5E2;
+    color: white;
     font-family: 'Montserrat', sans-serif;
     margin: 20px 0;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border: 2px solid #0CA5E2;
-    border-radius: 4px;
+    padding: 0;
+    background: none;
+    border: none;
     text-align: left;
     line-height: 20px;
-    width: 365px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 #visor-price small {
-    display: block;
+    display: none;
 }
 
 /* Make button active state */
@@ -419,18 +433,19 @@
     }
 
     .make-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
+        justify-content: center;
+        gap: 10px;
         margin-bottom: 20px;
     }
 
     .make-button {
         padding: 8px;
         min-height: 80px;
+        margin: 3px;
     }
 
     .make-button img {
-        width: 80px;
+        width: 60px;
         height: auto;
     }
 
@@ -454,12 +469,14 @@
     }
 
     .pack-wrap {
-        flex-direction: column;
+        flex-direction: row;
         gap: 10px;
+        justify-content: center;
     }
 
     .pack-wrap label {
-        width: 100%;
+        flex: 1;
+        min-width: 120px;
         height: 50px;
         font-size: 14px;
     }
@@ -491,18 +508,23 @@
         gap: 10px;
     }
 
-    #add-to-cart,
-    .reset-button,
-    .clear-button {
+    #add-to-cart {
         width: 100%;
         padding: 15px;
         font-size: 14px;
     }
 
+    .reset-button,
+    .clear-button {
+        width: auto;
+        padding: 0;
+        font-size: 12px;
+    }
+
     #visor-price {
-        font-size: 20px;
+        font-size: 18px;
         margin: 15px 0;
-        padding: 12px;
+        padding: 0;
     }
 
     .selector-title {
@@ -515,7 +537,7 @@
 @media (max-width: 480px) {
     .make-grid {
         grid-template-columns: 1fr;
-        gap: 12px;
+        gap: 10px;
     }
 
     .make-button {

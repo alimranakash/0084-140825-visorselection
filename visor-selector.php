@@ -574,36 +574,12 @@ add_action('init', function () {
         		<button id="model-unknown" type="button">OTHER / UNKNOWN</button>
 			  </div>';
 		echo '<h2 class="selector-title">PACK TYPE</h2>';
-		echo '<div class="pack-wrap">
-    			<input type="radio" name="pack" id="pack-full" value="Full Pack">
-				<label for="pack-full">Full Pack</label>
-    			<input type="radio" name="pack" id="pack-insert" value="Insert Only">
-				<label for="pack-insert">Insert Only</label>
-			  </div>';
-        echo '<div id="battery-colour-wrap" style="display:none; margin-top: 20px;">
-            <h2 class="selector-title">BATTERY PACK COLOUR</h2>
-            <div class="battery-wrap">
-                <input type="radio" name="battery_colour" id="battery-black" value="Black">
-                <label for="battery-black">Black</label>
-                <input type="radio" name="battery_colour" id="battery-grey" value="Grey">
-                <label for="battery-grey">Grey</label>
-            </div>
-        </div>';
+		echo '<div class="pack-wrap"><input type="radio" name="pack" id="pack-full" value="Full Pack"><label for="pack-full">Full Pack</label><input type="radio" name="pack" id="pack-insert" value="Insert Only"><label for="pack-insert">Insert Only</label></div>';
+        echo '<div id="battery-colour-wrap" style="display:none; margin-top: 20px;"><h2 class="selector-title">BATTERY PACK COLOUR</h2><div class="battery-wrap"><input type="radio" name="battery_colour" id="battery-black" value="Black"><label for="battery-black">Black</label><input type="radio" name="battery_colour" id="battery-grey" value="Grey"><label for="battery-grey">Grey</label></div></div>';
 
-        echo '<div id="extras-wrap" style="display:none; margin-top: 20px;">
-            <h2 class="selector-title">EXTRAS</h2>
-            <div class="extras-options">
-                <input type="checkbox" name="extras" id="extras-battery" value="extra-battery">
-                <label for="extras-battery">Extra Battery</label>
-                <input type="checkbox" name="extras" id="extras-insert" value="extra-insert">
-                <label for="extras-insert">Extra Insert</label>
-            </div>
-            <div class="extras-controls">
-                <button type="button" id="clear-extras" class="clear-button">Clear Extras</button>
-            </div>
-        </div>';
+        echo '<div id="extras-wrap" style="display:none; margin-top: 20px;"><h2 class="selector-title">EXTRAS</h2><div class="extras-options"><input type="checkbox" name="extras" id="extras-battery" value="extra-battery"><label for="extras-battery">Extra Battery</label><input type="checkbox" name="extras" id="extras-insert" value="extra-insert"><label for="extras-insert">Extra Insert</label><button type="button" id="clear-extras" class="clear-button">clear</button></div></div>';
 
-        echo '<div id="visor-price">Price: -</div>';
+        echo '<div id="visor-price">YOUR PRICE £XXX.XX</div>';
         echo '<div class="action-buttons">';
         echo '<button id="add-to-cart" disabled>Add to Cart</button>';
         echo '<button type="button" id="reset-selection" class="reset-button">Reset Selection</button>';
